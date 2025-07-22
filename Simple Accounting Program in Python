@@ -1,0 +1,134 @@
+import json
+from datetime import datetime
+
+# Initialize ledger (list to store transactions)
+ledger = []
+
+# File to save transactions
+DATA_FILE = "ledger.json"
+
+def load_ledger():
+    """Load transactions from file if it exists."""
+    try:
+        with open(DATA_FILE, 'r') as file:
+            global ledger
+            ledger = json.load(file)
+    except FileNotFoundError:
+        ledger = []
+
+def save_ledger():
+    """Save transactions to file."""
+    with open(DATA_FILE, 'w') as file:
+        json.dump(ledger, file, indent=4)
+
+def add_transaction(amount, category, description, is_income):
+    """Add a transaction to the ledger."""
+    transaction = {
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "amount": float(amount),
+        "category": category,
+        "description": description,
+        "type": "Income" if is_income else "Expense"
+    }
+    ledger.append(transaction)
+    save_ledger()
+    print(f"Added {transaction['type']}: {description} (${amount})")
+
+def view_ledger():
+    """Display all transactions and current balance."""
+    if not ledger:
+        print("No transactions found.")
+        return
+
+    print("\n=== Transaction Ledger ===")
+    print(f"{'Date':<20} {'Type':<10} {'Category':<15} {'Description':<25} {'Amount':<10}")
+    print("-" * 80)
+    
+    balance = 0
+    for t in ledger:
+        amount = t["amount"] if t["type"] == "Income" else -t["amount"]
+        balance += amount
+        print(f"{t['date']:<20} {t['type']:<10} {t['category']:<15} {t['description']:<25} ${t['amount']:.2f}")
+    
+    print(f"\nCurrent Balance: ${balance:.2f}")
+
+def main():
+    """Main program loop."""
+    load_ledger()
+    while True:
+        print("\n=== Simple Accounting Program ===")
+        print("1. Add Income")
+        print("2. Add Expense")
+        print("3. View Ledger")
+        print("4. Exit")
+        
+        choice = input("Enter choice (1-4): ")
+        
+        if choice == "1":
+            amount = input("Enter income amount: ")
+            category = input("Enter category (e.g., Salary, Sales): ")
+            description = input("Enter description: ")
+            try:
+                add_transaction(float(amount), category, description, True)
+            except ValueError:
+                print("Invalid amount. Please enter a number.")
+        
+        elif choice == "2":
+            amount = input("Enter expense amount: ")
+            category = input("Enter category (e.g., Rent, Supplies): ")
+            description = input("Enter description: ")
+            try:
+                add_transaction(float(amount), category, description, False)
+            except ValueError:
+                print("Invalid amount. Please enter a number.")
+        
+        elif choice == "3":
+            view_ledger()
+        
+        elif choice == "4":
+            print("Exiting program.")
+            break
+        
+        else:
+            print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    main()
+
+
+=== Simple Accounting Program ===
+1. Add Income
+2. Add Expense
+3. View Ledger
+4. Exit
+Enter choice (1-4): 1
+Enter income amount: 1000
+Enter category (e.g., Salary, Sales): Salary
+Enter description: Monthly salary
+Added Income: Monthly salary ($1000.0)
+
+=== Simple Accounting Program ===
+1. Add Income
+2. Add Expense
+3. View Ledger
+4. Exit
+Enter choice (1-4): 2
+Enter expense amount: 200
+Enter category (e.g., Rent, Supplies): Rent
+Enter description: Office rent
+Added Expense: Office rent ($200.0)
+
+=== Simple Accounting Program ===
+1. Add Income
+2. Add Expense
+3. View Ledger
+4. Exit
+Enter choice (1-4): 3
+
+=== Transaction Ledger ===
+Date                 Type       Category        Description               Amount    
+--------------------------------------------------------------------------------
+2025-07-23 01:23:45  Income     Salary          Monthly salary            $1000.00
+2025-07-23 01:24:10  Expense    Rent            Office rent               $200.00
+
+Current Balance: $800.00
